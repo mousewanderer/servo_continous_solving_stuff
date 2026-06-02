@@ -1,26 +1,98 @@
-# servo_continous_solving_stuff
+# Continuous Servo Step Controller (ESP32)
 
-in my servo neutral band is at 92 to 96 
+Control a continuous rotation servo like a stepper motor using an ESP32, with serial commands for precise angle movements.
 
+---
 
-first servo 1
-at 91 slow moving at 0 max speed at left
-if 97 slow moving at 180 max speed at the right
+## Hardware
 
+- ESP32
+- Continuous rotation servo (signal wire → GPIO 26)
+- Power supply
 
+---
 
-2nd servo 2 (same thing)
-at 91 slow moving at 0 max speed at left
-if 97 slow moving at 180 max speed at the right
+## Servo Calibration
 
+This project uses two calibration methods depending on your servo:
 
-so I set variables
-cause 94 = (96+92)/2
-consider 92 93 94 95 96
-seperation buy 14 pieces cause 
-91 starts spining but slowly small difference affected. 
-between the 92. 1 battery then the entrie thing breaks. problem is there is no feeedback
+### Method 1 — `servo.write()` (degrees)
 
+| State | Value | Behavior |
+|-------|-------|----------|
+| Stop (neutral band) | 92–96 | No movement |
+| STOP | 94 | Centered stop |
+| LEFT | 90 | Slow left |
+| RIGHT | 98 | Slow right |
+
+> The neutral band on this servo is 92–96. Values outside this range cause movement; the further from center, the faster the spin.
+
+### Method 2 — `servo.writeMicroseconds()` (µs)
+
+| State | Value |
+|-------|-------|
+| STOP | 1520 µs |
+| LEFT | 1450 µs |
+| RIGHT | 1590 µs |
+
+> Microsecond control gives finer resolution. Prefer this method if your servo is twitchy with degree values.
+
+---
+
+## Step Calibration
+
+Steps are timed pulses — not encoder feedback. Accuracy depends on consistent voltage and pulse timing.
+
+| Angle | Steps |
+|-------|-------|
+| 90°   | 18–20 |
+| 180°  | 36–40 |
+| 360°  | 72–80 |
+
+Tune `STEP_PULSE_MS` (default: 15–20ms) and `STEP_PAUSE_MS` (default: 80–100ms) to match your servo's actual rotation.
+
+---
+
+## Serial Commands
+
+Open Serial Monitor at **115200 baud**.
+
+| Key | Action |
+|-----|--------|
+| `L` | Left 90° |
+| `R` | Right 90° |
+| `A` | Left 180° |
+| `D` | Right 180° |
+| `Q` | Left 360° |
+| `E` | Right 360° |
+| `S` | Stop |
+| `P` | Print status |
+
+---
+
+## Known Limitations
+
+- **No position feedback** — this is open-loop control. Errors accumulate over time.
+- Small deviations in battery voltage affect speed and step accuracy.
+- The gap between neutral band edge (92) and full stop (91) is only 1 unit — approach slowly when calibrating to avoid unexpected spin.
+
+---
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `servo_degree.ino` | Degree-based control using `servo.write()` |
+| `servo_microseconds.ino` | Microsecond-based control using `servo.writeMicroseconds()` |
+
+---
+
+## Dependencies
+
+- [ESP32Servo](https://github.com/madhephaestus/ESP32Servo) — install via Arduino Library Manager
+
+code current
+```
 const int STOP  = 94;
 const int LEFT  = 80;  
 const int RIGHT = 108;
@@ -197,7 +269,11 @@ void loop() {
   }
 }
 
+##
+```
 
+
+```
 #include <ESP32Servo.h>
 
 Servo servo;
@@ -354,3 +430,30 @@ void loop() {
     }
   }
 }
+
+```
+
+code working on the 2 variables I am focusing is the 
+
+// ciritcal 1
+const int STOP_US  = 1520;
+const int LEFT_US  = 1450;
+const int RIGHT_US = 1590;
+
+and
+
+
+critically its this 
+
+// ===== TIMING =====
+const int STEP_PULSE_MS = 15; // calibration area 20  - 40 rigth now 30ish
+
+const int STEP_PAUSE_MS = 80;
+
+outcome of this
+
+
+// 90° = 18 steps (measured)
+const int STEPS_90  = 18;
+const int STEPS_180 = 36;
+const int STEPS_360 = 72;
