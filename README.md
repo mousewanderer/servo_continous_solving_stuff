@@ -435,11 +435,11 @@ void loop() {
 
 code working on the 2 variables I am focusing is the 
 
-// ciritcal 1
+// critcal 1
 const int STOP_US  = 1520;
 const int LEFT_US  = 1450;
 const int RIGHT_US = 1590;
-
+(finding the median for the pulse leads to much more accuracy)
 and
 
 
@@ -449,10 +449,9 @@ critically its this
 const int STEP_PULSE_MS = 15; // calibration area 20  - 40 rigth now 30ish
 
 const int STEP_PAUSE_MS = 80;
+(finding the ideal tie of pulse is needed as lesser time will result to unreaded signals and more pulse will lead to much more acceleration)
 
-outcome of this
-
-
+outcome of this by timing and pulse are steps
 // 90° = 18 steps (measured)
 const int STEPS_90  = 18;
 const int STEPS_180 = 36;
